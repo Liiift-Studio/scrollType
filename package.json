@@ -1,7 +1,7 @@
 {
 	"name": "@liiift-studio/scrolltype",
-	"version": "0.0.2",
-	"description": "Scroll-adaptive typography — adapts letter-spacing, weight, and optical size in real time based on scroll velocity",
+	"version": "0.0.3",
+	"description": "Motion-adaptive typography — adapts letter-spacing, weight, and optical size based on scroll velocity or any custom motion source",
 	"type": "module",
 	"main": "dist/index.cjs",
 	"module": "dist/index.js",

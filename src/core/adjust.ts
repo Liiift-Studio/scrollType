@@ -153,14 +153,42 @@ export function applyScrollType(el: HTMLElement, velocity: number, options: Scro
  * @param el      - Element to adapt
  * @param options - ScrollTypeOptions (merged with defaults)
  */
+/**
+ * Start motion-adaptive typography on an element.
+ *
+ * By default, listens to window scroll events and normalises velocity by
+ * `velocityMax` px/frame. When `options.getVelocity` is provided the scroll
+ * listener is skipped entirely — the callback is called every animation frame
+ * and should return a pre-normalised value in [0, 1].
+ *
+ * Returns a cleanup function that cancels the loop and restores original styles.
+ *
+ * @param el      - Element to adapt
+ * @param options - ScrollTypeOptions (merged with defaults)
+ */
 export function startScrollType(el: HTMLElement, options: ScrollTypeOptions = {}): () => void {
 	if (typeof window === 'undefined') return () => undefined
 
+	let rafId: number
+
+	if (options.getVelocity) {
+		// ── External velocity source (gyroscope, audio, etc.) ──────────────────
+		const tick = () => {
+			rafId = requestAnimationFrame(tick)
+			applyScrollType(el, options.getVelocity!(), options)
+		}
+		rafId = requestAnimationFrame(tick)
+		return () => {
+			cancelAnimationFrame(rafId)
+			removeScrollType(el)
+		}
+	}
+
+	// ── Default: scroll event source ───────────────────────────────────────────
 	const velocityMax = options.velocityMax ?? DEFAULTS.velocityMax
 
 	let lastScrollY = window.scrollY
 	let lastTime = performance.now()
-	let rafId: number
 	let currentVelocity = 0
 
 	/** Compute px-per-frame velocity from scroll delta and elapsed time */
